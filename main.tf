@@ -45,7 +45,7 @@ resource "aws_s3_bucket" "main" {
     "Description"    = "Bucket of logs"
     "Terraform"      = "true"
     #"Application ID" = ""
-    "Security"       = "SSE:S3"
+    "Security"       = "SSE:AWS"
     #"Cost Center"    = "${var.tag_cost_center}"
   }
 }
