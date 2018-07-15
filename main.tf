@@ -35,7 +35,7 @@ resource "aws_s3_bucket" "main" {
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        sse_algorithm = "${local.sse_algorithm}"
+        sse_algorithm = "AES256"
       }
     }
   }
@@ -45,7 +45,7 @@ resource "aws_s3_bucket" "main" {
     "Description"    = "Bucket of logs"
     "Terraform"      = "true"
     #"Application ID" = ""
-    "Security"       = "${local.sse_algorithm}"
+    "Security"       = "SSE:S3"
     #"Cost Center"    = "${var.tag_cost_center}"
   }
 }
