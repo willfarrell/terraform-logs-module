@@ -18,17 +18,17 @@ resource "aws_s3_bucket" "main" {
     }
 
     transition {
-      days          = 30
+      days          = "${var.transition_infrequent_days}"
       storage_class = "STANDARD_IA"
     }
 
     transition {
-      days          = 60
+      days          = "${var.transition_glacier_days}"
       storage_class = "GLACIER"
     }
 
     expiration {
-      days = 365
+      days = "${var.expiration_days}"
     }
   }
 
