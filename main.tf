@@ -1,6 +1,5 @@
 resource "aws_s3_bucket" "main" {
   bucket              = "${var.name}-logs"
-  region              = "${var.region}"
   acl                 = "log-delivery-write"
 
   versioning {
