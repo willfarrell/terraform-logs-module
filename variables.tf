@@ -1,5 +1,8 @@
 variable "name" {}
-#variable "tag_name" {}
+variable "tags" {
+  type = "map"
+  default = {}
+}
 variable "transition_infrequent_days" {
   default = 30
 }
