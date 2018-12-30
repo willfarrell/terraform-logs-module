@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "main" {
-  bucket              = "${var.name}-logs"
+  bucket              = "${var.name}-${terraform.workspace}-logs"
   acl                 = "log-delivery-write"
   acceleration_status = "Enabled"
 
