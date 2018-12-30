@@ -1,7 +1,6 @@
 resource "aws_s3_bucket" "main" {
   bucket              = "${var.name}-logs"
   acl                 = "log-delivery-write"
-  acceleration_status = "Enabled"
 
   versioning {
     enabled = false
