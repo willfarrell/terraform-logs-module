@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "main" {
-  bucket              = "${var.name}-${terraform.workspace}-logs"
+  bucket              = "${var.name}-logs"
   acl                 = "log-delivery-write"
   acceleration_status = "Enabled"
 
@@ -39,13 +39,8 @@ resource "aws_s3_bucket" "main" {
       }
     }
   }
-
-  tags {
-    "Name"           = "${var.name}-logs"
-    "Description"    = "Bucket of logs"
-    "Terraform"      = "true"
-    #"Application ID" = ""
-    "Security"       = "SSE:AWS"
-    #"Cost Center"    = "${var.tag_cost_center}"
-  }
+  
+  tags   = "${merge(var.tags, map(
+    "Security", "SSE:AWS"
+  ))}"
 }
