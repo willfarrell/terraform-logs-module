@@ -5,7 +5,7 @@ Bucket for logs with lifecycle archiving
 ```hcl-terraform
 module "logs" {
   source = "git@github.com:willfarrell/terraform-s3-logs-module"
-  name = "${var.name}"
+  name = "${var.name}-${terraform.workspace}"
   #kms_key_id = "${}" # Not possible as of 2018-07-15
 }
 resource "aws_s3_bucket" "main" {
