@@ -10,7 +10,6 @@ resource "aws_s3_bucket" "main" {
     id      = "log"
     enabled = true
 
-    prefix  = "log/"
     tags {
       "rule"      = "log"
       "autoclean" = "true"
