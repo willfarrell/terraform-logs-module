@@ -1,6 +1,7 @@
 resource "aws_s3_bucket" "main" {
-  bucket              = "${var.name}-logs"
-  acl                 = "log-delivery-write"
+  bucket = "${var.name}-logs"
+  region = "${var.region}"
+  acl    = "log-delivery-write"
 
   versioning {
     enabled = false
@@ -37,8 +38,8 @@ resource "aws_s3_bucket" "main" {
       }
     }
   }
-  
-  tags   = "${merge(var.tags, map(
+
+  tags = "${merge(var.tags, map(
     "Security", "SSE:AWS"
   ))}"
 }

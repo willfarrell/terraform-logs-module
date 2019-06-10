@@ -15,3 +15,8 @@ variable "transition_glacier_days" {
 variable "expiration_days" {
   default = 365
 }
+
+variable "region" {
+  type = "string"
+  default = "us-east-1"
+}
