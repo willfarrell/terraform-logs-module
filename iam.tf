@@ -13,7 +13,7 @@ resource "aws_s3_bucket_policy" "main" {
         "s3:PutObject"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:s3:::${aws_s3_bucket.default.id}/AWSLogs/${data.aws_caller_identity.current.account_id}/*",
+      "Resource": "arn:aws:s3:::${aws_s3_bucket.default.id}/*",
       "Principal": {
         "AWS": [
           "127311923021",
@@ -33,11 +33,7 @@ resource "aws_s3_bucket_policy" "main" {
           "114774131450",
           "783225319266",
           "718504428378",
-          "507241528517",
-          "048591011584",
-          "190560391635",
-          "638102146993",
-          "037604701340"
+          "507241528517"
         ]
       }
     }
