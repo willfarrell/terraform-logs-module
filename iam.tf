@@ -1,5 +1,6 @@
 
 // Ref: https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy
+// us-gov-* and cn-* are not allowed
 resource "aws_s3_bucket_policy" "main" {
   bucket = "${aws_s3_bucket.default.id}"
 
@@ -8,7 +9,6 @@ resource "aws_s3_bucket_policy" "main" {
   "Version": "2012-10-17",
   "Statement": [
     {
-
       "Action": [
         "s3:PutObject"
       ],
