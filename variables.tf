@@ -15,8 +15,3 @@ variable "transition_glacier_days" {
 variable "expiration_days" {
   default = 365
 }
-
-variable "provider" {
-  type = "string"
-  default = "aws"
-}

@@ -1,5 +1,4 @@
 resource "aws_s3_bucket" "default" {
-  provider = "${var.provider}"
   bucket = "${var.name}-logs"
   acl    = "log-delivery-write"
 
