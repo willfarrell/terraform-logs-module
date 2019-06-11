@@ -20,3 +20,8 @@ variable "region" {
   type = "string"
   default = "us-east-1"
 }
+
+variable "provider" {
+  type = "string"
+  default = "aws"
+}
