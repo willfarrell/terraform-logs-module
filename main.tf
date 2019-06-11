@@ -1,4 +1,4 @@
-resource "aws_s3_bucket" "main" {
+resource "aws_s3_bucket" "default" {
   bucket = "${var.name}-logs"
   region = "${var.region}"
   acl    = "log-delivery-write"
