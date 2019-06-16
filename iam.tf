@@ -1,8 +1,7 @@
-
 // Ref: https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy
 // us-gov-* and cn-* are not allowed
 resource "aws_s3_bucket_policy" "main" {
-  bucket = "${aws_s3_bucket.default.id}"
+  bucket = aws_s3_bucket.default.id
 
   policy = <<POLICY
 {
@@ -40,77 +39,78 @@ resource "aws_s3_bucket_policy" "main" {
   ]
 }
 POLICY
+
 }
 
 // Source: https://github.com/QuiNovas/terraform-aws-cloudtrail/blob/master/s3-bucket.tf
 data "aws_iam_policy_document" "cloudtrail" {
-
   statement {
     actions = [
-      "s3:GetBucketAcl"
+      "s3:GetBucketAcl",
     ]
     principals {
       identifiers = [
-        "cloudtrail.amazonaws.com"
+        "cloudtrail.amazonaws.com",
       ]
       type = "Service"
     }
     resources = [
-      "${aws_s3_bucket.default.arn}"
+      aws_s3_bucket.default.arn,
     ]
     sid = "CloudTrail Acl Check"
   }
 
   statement {
     actions = [
-      "s3:PutObject"
+      "s3:PutObject",
     ]
     condition {
       test = "StringEquals"
       values = [
-        "bucket-owner-full-control"
+        "bucket-owner-full-control",
       ]
       variable = "s3:x-amz-acl"
     }
     principals {
       identifiers = [
-        "cloudtrail.amazonaws.com"
+        "cloudtrail.amazonaws.com",
       ]
       type = "Service"
     }
     resources = [
-      "${aws_s3_bucket.default.arn}/*"
+      "${aws_s3_bucket.default.arn}/*",
     ]
     sid = "CloudTrail Write"
   }
 
   statement {
     actions = [
-      "s3:*"
+      "s3:*",
     ]
     condition {
       test = "Bool"
       values = [
-        "false"
+        "false",
       ]
       variable = "aws:SecureTransport"
     }
     effect = "Deny"
     principals {
       identifiers = [
-        "*"
+        "*",
       ]
       type = "AWS"
     }
     resources = [
-      "${aws_s3_bucket.default.arn}",
-      "${aws_s3_bucket.default.arn}/*"
+      aws_s3_bucket.default.arn,
+      "${aws_s3_bucket.default.arn}/*",
     ]
     sid = "DenyUnsecuredTransport"
   }
 }
 
 resource "aws_s3_bucket_policy" "cloudtrail" {
-  bucket = "${aws_s3_bucket.default.id}"
-  policy = "${data.aws_iam_policy_document.cloudtrail.json}"
+  bucket = aws_s3_bucket.default.id
+  policy = data.aws_iam_policy_document.cloudtrail.json
 }
+

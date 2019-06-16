@@ -10,23 +10,23 @@ resource "aws_s3_bucket" "default" {
     id      = "log"
     enabled = true
 
-    tags {
+    tags = {
       "rule"      = "log"
       "autoclean" = "true"
     }
 
     transition {
-      days          = "${var.transition_infrequent_days}"
+      days          = var.transition_infrequent_days
       storage_class = "STANDARD_IA"
     }
 
     transition {
-      days          = "${var.transition_glacier_days}"
+      days          = var.transition_glacier_days
       storage_class = "GLACIER"
     }
 
     expiration {
-      days = "${var.expiration_days}"
+      days = var.expiration_days
     }
   }
 
@@ -38,16 +38,20 @@ resource "aws_s3_bucket" "default" {
     }
   }
 
-  tags = "${merge(var.tags, map(
-    "Security", "SSE:AWS"
-  ))}"
+  tags = merge(
+    var.tags,
+    {
+      "Security" = "SSE:AWS"
+    }
+  )
 }
 
 resource "aws_s3_bucket_public_access_block" "default" {
-  bucket = "${aws_s3_bucket.default.id}"
+  bucket = aws_s3_bucket.default.id
 
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
