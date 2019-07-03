@@ -1,49 +1,39 @@
-// Ref: https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy
-// us-gov-* and cn-* are not allowed
-resource "aws_s3_bucket_policy" "main" {
-  bucket = aws_s3_bucket.default.id
 
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": [
-        "s3:PutObject"
-      ],
-      "Effect": "Allow",
-      "Resource": "arn:aws:s3:::${aws_s3_bucket.default.id}/*",
-      "Principal": {
-        "AWS": [
-          "127311923021",
-          "033677994240",
-          "027434742980",
-          "797873946194",
-          "985666609251",
-          "054676820928",
-          "156460612806",
-          "652711504416",
-          "009996457667",
-          "897822967062",
-          "754344448648",
-          "582318560864",
-          "600734575887",
-          "383597477331",
-          "114774131450",
-          "783225319266",
-          "718504428378",
-          "507241528517"
-        ]
-      }
-    }
-  ]
-}
-POLICY
-
-}
-
-// Source: https://github.com/QuiNovas/terraform-aws-cloudtrail/blob/master/s3-bucket.tf
 data "aws_iam_policy_document" "cloudtrail" {
+  // Ref: https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy
+  // us-gov-* and cn-* are not allowed
+  statement {
+    actions = [
+      "s3:PutObject"
+    ]
+    principals {
+      identifiers = [
+        "127311923021",
+        "033677994240",
+        "027434742980",
+        "797873946194",
+        "985666609251",
+        "054676820928",
+        "156460612806",
+        "652711504416",
+        "009996457667",
+        "897822967062",
+        "754344448648",
+        "582318560864",
+        "600734575887",
+        "383597477331",
+        "114774131450",
+        "783225319266",
+        "718504428378",
+        "507241528517"
+      ]
+      type        = "AWS"
+    }
+    resources = ["arn:aws:s3:::${aws_s3_bucket.default.id}/*"]
+    sid = "Access Logs"
+  }
+
+  // Source: https://github.com/QuiNovas/terraform-aws-cloudtrail/blob/master/s3-bucket.tf
   statement {
     actions = [
       "s3:GetBucketAcl",
@@ -109,7 +99,7 @@ data "aws_iam_policy_document" "cloudtrail" {
   }
 }
 
-resource "aws_s3_bucket_policy" "cloudtrail" {
+resource "aws_s3_bucket_policy" "main" {
   bucket = aws_s3_bucket.default.id
   policy = data.aws_iam_policy_document.cloudtrail.json
 }
