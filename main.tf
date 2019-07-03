@@ -11,8 +11,8 @@ resource "aws_s3_bucket" "default" {
     enabled = true
 
     tags = {
-      "rule"      = "log"
-      "autoclean" = "true"
+      rule      = "log"
+      autoclean = "true"
     }
 
     transition {
