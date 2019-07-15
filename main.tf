@@ -10,7 +10,7 @@ resource "aws_s3_bucket" "default" {
     id      = "log"
     enabled = true
 
-    tags = {
+    tags {
       rule      = "log"
       autoclean = "true"
     }
@@ -55,3 +55,14 @@ resource "aws_s3_bucket_public_access_block" "default" {
   restrict_public_buckets = true
 }
 
+# https://docs.aws.amazon.com/macie/latest/userguide/macie-setting-up.html#macie-setting-up-enable
+# https://www.terraform.io/docs/providers/aws/r/macie_s3_bucket_association.html
+# move to AWS s3 example
+//resource "aws_macie_s3_bucket_association" "example" {
+//  bucket_name = "tf-macie-example"
+//  prefix      = "data"
+//
+//  classification_type {
+//    one_time = "FULL"
+//  }
+//}
