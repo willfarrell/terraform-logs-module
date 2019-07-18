@@ -45,12 +45,13 @@ resource "aws_s3_bucket" "default" {
   tags = merge(
     var.tags,
     {
-      "Security" = "SSE:AWS"
+      Security = "SSE:AWS"
     }
   )
 }
 
 resource "aws_s3_bucket_public_access_block" "default" {
+  depends_on = [aws_s3_bucket.default]
   bucket = aws_s3_bucket.default.id
 
   block_public_acls       = true
