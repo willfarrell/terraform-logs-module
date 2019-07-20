@@ -27,10 +27,10 @@ data "aws_iam_policy_document" "cloudtrail" {
         "arn:aws:iam::027434742980:root",
         "arn:aws:iam::009996457667:root",
       ]
-      type        = "AWS"
+      type = "AWS"
     }
     resources = ["arn:aws:s3:::${aws_s3_bucket.default.id}/*"]
-    sid = "Access Logs"
+    sid       = "Access Logs"
   }
 
   // Source: https://github.com/QuiNovas/terraform-aws-cloudtrail/blob/master/s3-bucket.tf
@@ -101,7 +101,7 @@ data "aws_iam_policy_document" "cloudtrail" {
 
 resource "aws_s3_bucket_policy" "main" {
   depends_on = [aws_s3_bucket.default, data.aws_iam_policy_document.cloudtrail]
-  bucket = aws_s3_bucket.default.id
-  policy = data.aws_iam_policy_document.cloudtrail.json
+  bucket     = aws_s3_bucket.default.id
+  policy     = data.aws_iam_policy_document.cloudtrail.json
 }
 
