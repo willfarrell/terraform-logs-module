@@ -1,4 +1,5 @@
 
+# TODO move to CloudTrail module, output role for injestion
 data "aws_iam_policy_document" "cloudtrail" {
   // Ref: https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy
   // us-gov-* and cn-* are not allowed
