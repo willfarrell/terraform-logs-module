@@ -1,10 +1,9 @@
-
 # TODO move to CloudTrail module, output role for injestion
 data "aws_iam_policy_document" "cloudtrail" {
   // Ref: https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy
   // us-gov-* and cn-* are not allowed
   statement {
-    actions = [
+    actions   = [
       "s3:PutObject"
     ]
     principals {
@@ -28,36 +27,41 @@ data "aws_iam_policy_document" "cloudtrail" {
         "arn:aws:iam::027434742980:root",
         "arn:aws:iam::009996457667:root",
       ]
-      type = "AWS"
+      type        = "AWS"
     }
-    resources = ["arn:aws:s3:::${aws_s3_bucket.default.id}/*"]
+    resources = [
+      "arn:aws:s3:::${aws_s3_bucket.default.id}/*"]
     sid       = "Access Logs"
   }
 
-  // Source: https://github.com/QuiNovas/terraform-aws-cloudtrail/blob/master/s3-bucket.tf
+  // CloudTrail: https://github.com/QuiNovas/terraform-aws-cloudtrail/blob/master/s3-bucket.tf
+  // AWS Config: https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-policy.html
   statement {
-    actions = [
-      "s3:GetBucketAcl",
+    actions   = [
+      "s3:ListBucket",
+      "s3:GetBucketAcl"
     ]
     principals {
       identifiers = [
         "cloudtrail.amazonaws.com",
+        "config.amazonaws.com",
+        "delivery.logs.amazonaws.com"
       ]
-      type = "Service"
+      type        = "Service"
     }
     resources = [
       aws_s3_bucket.default.arn,
     ]
-    sid = "CloudTrail Acl Check"
+    sid       = "BucketPermissionsCheck"
   }
 
   statement {
-    actions = [
+    actions   = [
       "s3:PutObject",
     ]
     condition {
-      test = "StringEquals"
-      values = [
+      test     = "StringEquals"
+      values   = [
         "bucket-owner-full-control",
       ]
       variable = "s3:x-amz-acl"
@@ -65,43 +69,64 @@ data "aws_iam_policy_document" "cloudtrail" {
     principals {
       identifiers = [
         "cloudtrail.amazonaws.com",
+        "config.amazonaws.com",
+        "delivery.logs.amazonaws.com"
       ]
-      type = "Service"
+      type        = "Service"
     }
     resources = [
       "${aws_s3_bucket.default.arn}/*",
     ]
-    sid = "CloudTrail Write"
+    sid       = "BucketDelivery"
   }
 
   statement {
     actions = [
+      "s3:ListBucket"
+    ]
+    principals {
+      identifiers = [
+        "config.amazonaws.com"
+      ]
+      type        = "Service"
+    }
+    resources = [
+      aws_s3_bucket.default.arn,
+    ]
+    sid = "BucketExistenceCheck"
+  }
+
+  // General
+  statement {
+    actions   = [
       "s3:*",
     ]
     condition {
-      test = "Bool"
-      values = [
+      test     = "Bool"
+      values   = [
         "false",
       ]
       variable = "aws:SecureTransport"
     }
-    effect = "Deny"
+    effect    = "Deny"
     principals {
       identifiers = [
         "*",
       ]
-      type = "AWS"
+      type        = "AWS"
     }
     resources = [
       aws_s3_bucket.default.arn,
       "${aws_s3_bucket.default.arn}/*",
     ]
-    sid = "DenyUnsecuredTransport"
+    sid       = "DenyUnsecuredTransport"
   }
 }
 
 resource "aws_s3_bucket_policy" "main" {
-  depends_on = [aws_s3_bucket.default, data.aws_iam_policy_document.cloudtrail]
+  depends_on = [
+    aws_s3_bucket.default,
+    data.aws_iam_policy_document.cloudtrail]
   bucket     = aws_s3_bucket.default.id
   policy     = data.aws_iam_policy_document.cloudtrail.json
 }

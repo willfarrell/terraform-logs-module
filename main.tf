@@ -3,7 +3,7 @@ resource "aws_s3_bucket" "default" {
   acl    = "log-delivery-write"
 
   versioning {
-    enabled = false
+    enabled = true
   }
 
   lifecycle_rule {
@@ -30,9 +30,20 @@ resource "aws_s3_bucket" "default" {
     }
   }
 
-  lifecycle {
-    prevent_destroy = true
+  dynamic "logging" {
+    for_each = var.logging_bucket != "" ? [var.logging_bucket] : []
+    content {
+      target_bucket = logging.value
+    }
   }
+
+  // TODO not support yet - https://github.com/terraform-providers/terraform-provider-aws/issues/9459
+  /*object_level_logging {
+    target_trail = var.target_trail
+    events       = "Read/Write"
+  }*/
+
+  force_destroy = false
 
   server_side_encryption_configuration {
     rule {
@@ -42,16 +53,17 @@ resource "aws_s3_bucket" "default" {
     }
   }
 
-  tags = merge(
-    var.tags,
-    {
-      Security = "SSE:AWS"
-    }
-  )
+  /*tags = merge(
+  var.tags,
+  {
+    Security = "SSE:AWS"
+  }
+  )*/
 }
 
 resource "aws_s3_bucket_public_access_block" "default" {
-  depends_on = [aws_s3_bucket.default]
+  depends_on = [
+    aws_s3_bucket.default]
   bucket     = aws_s3_bucket.default.id
 
   block_public_acls       = true

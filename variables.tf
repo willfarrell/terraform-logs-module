@@ -21,3 +21,12 @@ variable "expiration_days" {
   default = 365
 }
 
+variable "logging_bucket" {
+  type = string
+  default = ""
+}
+
+//variable "target_trail" {
+//  type = string
+//}
+
