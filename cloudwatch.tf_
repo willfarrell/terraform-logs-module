@@ -1,0 +1,160 @@
+# https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs//SubscriptionFilters.html#FirehoseExample
+
+resource "aws_cloudwatch_log_subscription_filter" "main" {
+  name = "${local.name}-logfilter"
+  role_arn = aws_iam_role.logging-source.arn
+  log_group_name = "*" # needed per group
+  filter_pattern = "*"
+}
+
+resource "aws_iam_role" "logging-source" {
+  name = "${local.name}-cloudwatch-source-role"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "logs.${local.region}.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+
+}
+
+
+resource "aws_iam_policy" "logging-source" {
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid":"KinesisAccess",
+      "Action": [
+        "kinesis:DescribeStream",
+        "kinesis:GetShardIterator",
+        "kinesis:GetRecords"
+      ],
+      "Resource": [
+        "${aws_kinesis_firehose_delivery_stream.main.arn}"
+      ],
+      "Effect": "Allow"
+    },
+    {
+      "Sid":"S3Access",
+      "Action": [
+        "s3:AbortMultipartUpload",
+        "s3:GetBucketLocation",
+        "s3:GetObject",
+        "s3:ListBucket",
+        "s3:ListBucketMultipartUploads",
+        "s3:PutObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::${aws_s3_bucket.default.id}",
+        "arn:aws:s3:::${aws_s3_bucket.default.id}/*"
+      ],
+      "Effect": "Allow"
+    }
+  ]
+}
+POLICY
+
+}
+
+resource "aws_iam_role_policy_attachment" "logging-source" {
+  role = aws_iam_role.logging-source.name
+  policy_arn = aws_iam_policy.logging-source.arn
+}
+
+resource "aws_kinesis_firehose_delivery_stream" "main" {
+  name = "aws-cloudwatch-logs-${local.name}"
+  destination = "s3"
+
+  s3_configuration {
+    role_arn = aws_iam_role.logging-stream.arn
+    bucket_arn = "arn:aws:s3:::${aws_s3_bucket.default.id}"
+    prefix = "AWSLogs/${local.account_id}/CloudWatch/${local.region}/"
+  }
+}
+
+resource "aws_iam_role" "logging-stream" {
+  name = "${local.name}-cloudwatch-stream-role"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "firehose.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+
+}
+
+resource "aws_iam_policy" "logging-stream" {
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid":"CloudWatchAccess",
+      "Action": [
+        "logs:PutLogEvents"
+      ],
+      "Resource": [
+        "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/kinesisfirehose/${local.name}-cloudwatch-stream:*"
+      ],
+      "Effect": "Allow"
+    },
+    {
+      "Sid":"KinesisAccess",
+      "Action": [
+        "kinesis:DescribeStream",
+        "kinesis:GetShardIterator",
+        "kinesis:GetRecords"
+      ],
+      "Resource": [
+        "${aws_kinesis_firehose_delivery_stream.main.arn}"
+      ],
+      "Effect": "Allow"
+    },
+    {
+      "Sid":"S3Access",
+      "Action": [
+        "s3:AbortMultipartUpload",
+        "s3:GetBucketLocation",
+        "s3:GetObject",
+        "s3:ListBucket",
+        "s3:ListBucketMultipartUploads",
+        "s3:PutObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::${aws_s3_bucket.default.id}",
+        "arn:aws:s3:::${aws_s3_bucket.default.id}/*"
+      ],
+      "Effect": "Allow"
+    }
+  ]
+}
+POLICY
+
+}
+
+resource "aws_iam_role_policy_attachment" "logging-stream" {
+  role = aws_iam_role.logging-stream.name
+  policy_arn = aws_iam_policy.logging-stream.arn
+}

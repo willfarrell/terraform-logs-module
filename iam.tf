@@ -45,7 +45,8 @@ data "aws_iam_policy_document" "cloudtrail" {
       identifiers = [
         "cloudtrail.amazonaws.com",
         "config.amazonaws.com",
-        "delivery.logs.amazonaws.com"
+        "delivery.logs.amazonaws.com",
+        "firehose.amazonaws.com"
       ]
       type        = "Service"
     }
@@ -70,7 +71,8 @@ data "aws_iam_policy_document" "cloudtrail" {
       identifiers = [
         "cloudtrail.amazonaws.com",
         "config.amazonaws.com",
-        "delivery.logs.amazonaws.com"
+        "delivery.logs.amazonaws.com",
+        "firehose.amazonaws.com"
       ]
       type        = "Service"
     }
@@ -78,22 +80,6 @@ data "aws_iam_policy_document" "cloudtrail" {
       "${aws_s3_bucket.default.arn}/*",
     ]
     sid       = "BucketDelivery"
-  }
-
-  statement {
-    actions = [
-      "s3:ListBucket"
-    ]
-    principals {
-      identifiers = [
-        "config.amazonaws.com"
-      ]
-      type        = "Service"
-    }
-    resources = [
-      aws_s3_bucket.default.arn,
-    ]
-    sid = "BucketExistenceCheck"
   }
 
   // General
