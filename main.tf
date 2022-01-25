@@ -25,6 +25,7 @@ resource "aws_s3_bucket" "default" {
       storage_class = "GLACIER"
     }
 
+
     expiration {
       days = var.expiration_days
     }
@@ -34,6 +35,7 @@ resource "aws_s3_bucket" "default" {
     for_each = var.logging_bucket != "" ? [var.logging_bucket] : []
     content {
       target_bucket = logging.value
+      target_prefix = "AWSLogs/${local.account_id}/S3/${var.name}-logs/"
     }
   }
 

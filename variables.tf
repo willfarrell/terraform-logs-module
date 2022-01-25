@@ -18,7 +18,7 @@ variable "transition_glacier_days" {
 }
 
 variable "expiration_days" {
-  default = 365
+  default = 7*365+2 // 7y for financial, +2 for max number of leap years
 }
 
 variable "logging_bucket" {
