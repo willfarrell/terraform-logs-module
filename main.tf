@@ -1,19 +1,42 @@
 resource "aws_s3_bucket" "default" {
   bucket = "${var.name}-logs"
-  acl    = "log-delivery-write"
 
-  versioning {
-    enabled = true
+  // TODO not support yet - https://github.com/terraform-providers/terraform-provider-aws/issues/9459
+  /*object_level_logging {
+    target_trail = var.target_trail
+    events       = "Read/Write"
+  }*/
+
+  force_destroy = false
+
+  /*tags = merge(
+  var.tags,
+  {
+    Security = "SSE:AWS"
   }
+  )*/
+}
 
-  lifecycle_rule {
+resource "aws_s3_bucket_acl" "default" {
+  bucket = aws_s3_bucket.default.id
+  acl    = "log-delivery-write"
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "default" {
+  bucket = aws_s3_bucket.default.id
+  rule {
     id      = "log"
-    enabled = true
+    status = "Enabled"
 
-    tags = {
-      rule      = "log"
-      autoclean = "true"
+    filter {
+      and {
+        tags = {
+          rule      = "log"
+          autoclean = "true"
+        }
+      }
     }
+
 
     transition {
       days          = var.transition_infrequent_days
@@ -25,43 +48,35 @@ resource "aws_s3_bucket" "default" {
       storage_class = "GLACIER"
     }
 
-
     expiration {
       days = var.expiration_days
     }
   }
-
-  dynamic "logging" {
-    for_each = var.logging_bucket != "" ? [var.logging_bucket] : []
-    content {
-      target_bucket = logging.value
-      target_prefix = "AWSLogs/${local.account_id}/S3/${var.name}-logs/"
-    }
-  }
-
-  // TODO not support yet - https://github.com/terraform-providers/terraform-provider-aws/issues/9459
-  /*object_level_logging {
-    target_trail = var.target_trail
-    events       = "Read/Write"
-  }*/
-
-  force_destroy = false
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
-
-  /*tags = merge(
-  var.tags,
-  {
-    Security = "SSE:AWS"
-  }
-  )*/
 }
+
+resource "aws_s3_bucket_versioning" "default" {
+  bucket = aws_s3_bucket.default.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_logging" "default" {
+  count = var.logging_bucket != "" ? 1 : 0
+  bucket = aws_s3_bucket.default.id
+  target_bucket =  var.logging_bucket
+  target_prefix = "AWSLogs/${local.account_id}/S3/${var.name}-logs/"
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
+  bucket = aws_s3_bucket.default.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
 
 resource "aws_s3_bucket_public_access_block" "default" {
   depends_on = [
