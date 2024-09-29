@@ -79,6 +79,18 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
   }
 }
 
+resource "aws_s3_bucket_object_lock_configuration" "default" {
+  depends_on          = [aws_s3_bucket_versioning.default]
+  bucket              = aws_s3_bucket.default.id
+  object_lock_enabled = "Enabled"
+
+  rule {
+    default_retention {
+      mode = "COMPLIANCE"
+      days = var.expiration_days
+    }
+  }
+}
 
 resource "aws_s3_bucket_public_access_block" "default" {
   depends_on = [
