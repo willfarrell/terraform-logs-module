@@ -17,11 +17,6 @@ resource "aws_s3_bucket" "default" {
   )*/
 }
 
-resource "aws_s3_bucket_acl" "default" {
-  bucket = aws_s3_bucket.default.id
-  acl    = "log-delivery-write"
-}
-
 resource "aws_s3_bucket_lifecycle_configuration" "default" {
   bucket = aws_s3_bucket.default.id
   rule {
