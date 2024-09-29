@@ -1,8 +1,10 @@
-# TODO move to CloudTrail module, output role for injestion
+# TODO move to CloudTrail module, output role for ingestion
 data "aws_iam_policy_document" "cloudtrail" {
-  // Ref: https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy
-  // us-gov-* and cn-* are not allowed
+  # Ref: https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-access-logs.html#attach-bucket-policy
+  # us-gov-* and cn-* are not allowed
   statement {
+    sid       = "Access Logs"
+    effect    = "Allow"
     actions   = [
       "s3:PutObject"
     ]
@@ -31,12 +33,13 @@ data "aws_iam_policy_document" "cloudtrail" {
     }
     resources = [
       "arn:aws:s3:::${aws_s3_bucket.default.id}/*"]
-    sid       = "Access Logs"
   }
 
-  // CloudTrail: https://github.com/QuiNovas/terraform-aws-cloudtrail/blob/master/s3-bucket.tf
-  // AWS Config: https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-policy.html
+  # CloudTrail: https://github.com/QuiNovas/terraform-aws-cloudtrail/blob/master/s3-bucket.tf
+  # AWS Config: https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-policy.html
   statement {
+    sid       = "BucketPermissionsCheck"
+    effect    = "Allow"
     actions   = [
       "s3:ListBucket",
       "s3:GetBucketAcl"
@@ -53,10 +56,39 @@ data "aws_iam_policy_document" "cloudtrail" {
     resources = [
       aws_s3_bucket.default.arn,
     ]
-    sid       = "BucketPermissionsCheck"
   }
+  
+  # IAM Access Analyzer https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-policy-generation.html
+  # statement {
+  #   sid = "PolicyGenerationBucketPolicy"
+  #   effect    = "Allow"
+  #   principals  {
+  #     type = "AWS"
+  #     identifiers = ["*"]
+  #   }
+  #   actions = [
+  #     "s3:GetObject",
+  #     "s3:ListBucket"
+  #   ]
+  #   resources = [
+  #     "arn:aws:s3:::${aws_s3_bucket.default.id}",
+  #     "arn:aws:s3:::${aws_s3_bucket.default.id}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
+  #   ]
+  #   # condition {
+  #   #   test     = "StringEquals"
+  #   #   values   = ["organization-id"] # TODO
+  #   #   variable = "aws:PrincipalOrgID"
+  #   # }
+  #   condition {
+  #     test     = "StringLike"
+  #     values   = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/service-role/AccessAnalyzerMonitorServiceRole*"]
+  #     variable = "aws:PrincipalArn"
+  #   }
+  # }
 
   statement {
+    sid       = "BucketDelivery"
+    effect    = "Allow"
     actions   = [
       "s3:PutObject",
     ]
@@ -79,10 +111,9 @@ data "aws_iam_policy_document" "cloudtrail" {
     resources = [
       "${aws_s3_bucket.default.arn}/*",
     ]
-    sid       = "BucketDelivery"
   }
 
-  // General
+  # General
   statement {
     actions   = [
       "s3:*",

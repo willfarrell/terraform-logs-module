@@ -38,14 +38,20 @@ resource "aws_s3_bucket_lifecycle_configuration" "default" {
     }
 
 
-    transition {
-      days          = var.transition_infrequent_days
-      storage_class = "STANDARD_IA"
+    dynamic "transition" {
+      for_each =  var.transition_infrequent_days < var.expiration_days ? [1] : []
+      content {
+        days          = var.transition_infrequent_days
+        storage_class = "STANDARD_IA"
+      }
     }
 
-    transition {
-      days          = var.transition_glacier_days
-      storage_class = "GLACIER"
+    dynamic "transition"  {
+      for_each =  var.transition_glacier_days < var.expiration_days ? [1] : []
+      content {
+        days          = var.transition_glacier_days
+        storage_class = "GLACIER"
+      }
     }
 
     expiration {
@@ -72,7 +78,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
   bucket = aws_s3_bucket.default.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm = var.sse_algorithm
+      kms_master_key_id = var.kms_key_arn
     }
   }
 }
